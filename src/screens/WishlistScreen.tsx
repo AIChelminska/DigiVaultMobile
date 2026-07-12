@@ -14,6 +14,8 @@ import EmptyState from '../components/EmptyState';
 import { useWishlist, useRemoveFromWishlist } from '../hooks/useWishlist';
 import { useCart, useAddToCart } from '../hooks/useCart';
 import { usePurchasedCourses } from '../hooks/useCourses';
+import { useCurrentUser } from '../hooks/useCurrentUser';
+import { useAuthNavigation } from '../hooks/useAuthNavigation';
 import { Course } from '../types/course';
 import { WishlistScreenProps } from '../types/navigation';
 import { colors } from '../config/theme';
@@ -89,6 +91,8 @@ function WishlistItem({ item, inCart, isPurchased, addingToCart, onPress, onAddT
 }
 
 export default function WishlistScreen({ navigation }: WishlistScreenProps) {
+  const { isAuthenticated } = useCurrentUser();
+  const { onCartPress, onNotificationsPress } = useAuthNavigation(navigation);
   const { data: courses = [], isLoading, isError, refetch } = useWishlist();
   const { data: cart = [] } = useCart();
   const { data: purchasedCourses = [] } = usePurchasedCourses();
@@ -99,13 +103,22 @@ export default function WishlistScreen({ navigation }: WishlistScreenProps) {
     <View style={styles.container}>
       <AppHeader
         title="Wishlist"
-        onNotificationsPress={() => navigation.navigate('Notifications')}
-        onCartPress={() => navigation.navigate('Cart')}
+        onNotificationsPress={onNotificationsPress}
+        onCartPress={onCartPress}
       />
 
-      <QueryState isLoading={isLoading} isError={isError} onRetry={refetch} />
+      {!isAuthenticated && (
+        <EmptyState
+          icon="hearto"
+          title="Log in to use wishlist"
+          subtitle="Save courses you're interested in after signing in."
+          action={{ label: 'Log in', onPress: () => navigation.navigate('Login') }}
+        />
+      )}
 
-      {!isLoading && !isError && courses.length === 0 && (
+      {isAuthenticated && <QueryState isLoading={isLoading} isError={isError} onRetry={refetch} />}
+
+      {isAuthenticated && !isLoading && !isError && courses.length === 0 && (
         <EmptyState
           icon="hearto"
           title="Your wishlist is empty"
@@ -113,7 +126,7 @@ export default function WishlistScreen({ navigation }: WishlistScreenProps) {
         />
       )}
 
-      {!isLoading && !isError && courses.length > 0 && (
+      {isAuthenticated && !isLoading && !isError && courses.length > 0 && (
         <FlatList
           data={courses}
           keyExtractor={item => item.idCourse.toString()}

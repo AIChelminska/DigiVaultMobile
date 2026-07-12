@@ -23,5 +23,6 @@ export const useCurrentUser = () => {
     idUser: data?.idUser ?? null,
     firstName: data?.firstName ?? null,
     lastName: data?.lastName ?? null,
+    isAuthenticated: data != null,
   };
 };

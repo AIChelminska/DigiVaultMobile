@@ -22,7 +22,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
 
-  const logoY = useRef(new Animated.Value(SCREEN_HEIGHT / 2 - 144)).current;
+  const logoY = useRef(new Animated.Value(SCREEN_HEIGHT / 2 - 43)).current;
   const contentY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   useEffect(() => {
@@ -106,6 +106,13 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             <Text style={styles.subtitleLink}>Sign up</Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          style={styles.guestBtn}
+          onPress={() => navigation.navigate('Home')}
+          activeOpacity={0.8}>
+          <Text style={styles.guestBtnText}>Browse without account</Text>
+        </TouchableOpacity>
       </Animated.View>
     </SafeAreaView>
   );
@@ -119,7 +126,7 @@ const styles = StyleSheet.create({
   logo: {
     alignSelf: 'center',
     width: 300,
-    height: 200,
+    height: 85,
   },
   content: {
     flex: 1,
@@ -214,5 +221,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
+  },
+  guestBtn: {
+    alignSelf: 'center',
+    marginTop: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  guestBtnText: {
+    color: colors.black,
+    fontSize: 15,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });

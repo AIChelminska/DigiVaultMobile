@@ -1,11 +1,16 @@
 import { fetchWishlist, addToWishlist, removeFromWishlist } from '../api/wishlistApi';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCurrentUser } from './useCurrentUser';
 
-export const useWishlist = () => 
-    useQuery({
-        queryKey: ['wishlist'],
-        queryFn: fetchWishlist,
-});
+export const useWishlist = () => {
+  const { isAuthenticated } = useCurrentUser();
+
+  return useQuery({
+    queryKey: ['wishlist'],
+    queryFn: fetchWishlist,
+    enabled: isAuthenticated,
+  });
+};
 
 export const useAddToWishlist = () => {
         const queryClient = useQueryClient();

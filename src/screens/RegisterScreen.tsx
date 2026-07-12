@@ -28,7 +28,7 @@ export default function RegisterScreen({ navigation }: Props) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
-  const logoY = useRef(new Animated.Value(SCREEN_HEIGHT / 2 - 144)).current;
+  const logoY = useRef(new Animated.Value(SCREEN_HEIGHT / 2 - 43)).current;
   const contentY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   useEffect(() => {
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   logo: {
     alignSelf: 'center',
     width: 300,
-    height: 200,
+    height: 85,
   },
   content: {
     flex: 1,

@@ -45,7 +45,7 @@ export default function CourseDetailScreen({ route, navigation }: CourseDetailSc
   const { mutate: submitReview, isPending: submittingReview } = useAddReview(idCourse);
   const { mutate: removeReview, isPending: deletingReview } = useDeleteReview(idCourse);
 
-  const { idUser, firstName, lastName } = useCurrentUser();
+  const { idUser, firstName, lastName, isAuthenticated } = useCurrentUser();
 
   const myReview = reviews.find(r =>
     (r.idUser !== undefined && r.idUser === idUser) ||
@@ -146,7 +146,13 @@ export default function CourseDetailScreen({ route, navigation }: CourseDetailSc
           <TouchableOpacity style={styles.backOverlay} onPress={() => navigation.goBack()}>
             <AntDesignIcon name="arrowleft" size={22} color={colors.white} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.reportOverlay} onPress={() => setReportVisible(true)}>
+          <TouchableOpacity style={styles.reportOverlay} onPress={() => {
+            if (!isAuthenticated) {
+              navigation.navigate('Login');
+              return;
+            }
+            setReportVisible(true);
+          }}>
             <AntDesignIcon name="flag" size={20} color={colors.white} />
           </TouchableOpacity>
         </View>
@@ -291,39 +297,58 @@ export default function CourseDetailScreen({ route, navigation }: CourseDetailSc
       {/* BOTTOM BAR */}
       <View style={styles.bottomBar}>
         <Text style={styles.price}>{course.price.toFixed(2)} PLN</Text>
-        <TouchableOpacity
-          style={[styles.wishlistBtn, isPurchased && styles.wishlistBtnDisabled]}
-          onPress={() => {
-            if (isPurchased) return;
-            if (wishlisted) {
-              removeFromWishlist(idCourse);
-            } else {
-              addToWishlist(idCourse);
-            }
-          }}
-          disabled={isPurchased}
-          >
-          <AntDesignIcon
-            name={wishlisted ? 'heart' : 'hearto'}
-            size={22}
-            color={isPurchased ? colors.textFaint : colors.white}
-          />
-        </TouchableOpacity>
-        {isPurchased ? (
-          <View style={[styles.buyBtn, styles.buyBtnPurchased]}>
-            <AntDesignIcon name="checkcircle" size={16} color="#4CAF50" />
-            <Text style={styles.buyBtnTextPurchased}>Purchased</Text>
-          </View>
+        {!isAuthenticated ? (
+          <>
+            <TouchableOpacity
+              style={styles.guestLoginBtn}
+              onPress={() => navigation.navigate('Login')}
+              activeOpacity={0.8}>
+              <Text style={styles.guestLoginBtnText}>Log in</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.buyBtn}
+              onPress={() => navigation.navigate('Register')}
+              activeOpacity={0.8}>
+              <Text style={styles.buyBtnText}>Sign up</Text>
+            </TouchableOpacity>
+          </>
         ) : (
-          <TouchableOpacity
-            style={[styles.buyBtn, inCart && styles.buyBtnInCart]}
-            onPress={() => { if (!inCart) addToCart(idCourse); }}
-            disabled={inCart || addingToCart}
-            activeOpacity={0.8}>
-            <Text style={[styles.buyBtnText, inCart && styles.buyBtnTextInCart]}>
-              {inCart ? 'In cart' : addingToCart ? 'Adding…' : 'Add to cart'}
-            </Text>
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity
+              style={[styles.wishlistBtn, isPurchased && styles.wishlistBtnDisabled]}
+              onPress={() => {
+                if (isPurchased) return;
+                if (wishlisted) {
+                  removeFromWishlist(idCourse);
+                } else {
+                  addToWishlist(idCourse);
+                }
+              }}
+              disabled={isPurchased}
+            >
+              <AntDesignIcon
+                name={wishlisted ? 'heart' : 'hearto'}
+                size={22}
+                color={isPurchased ? colors.textFaint : colors.white}
+              />
+            </TouchableOpacity>
+            {isPurchased ? (
+              <View style={[styles.buyBtn, styles.buyBtnPurchased]}>
+                <AntDesignIcon name="checkcircle" size={16} color="#4CAF50" />
+                <Text style={styles.buyBtnTextPurchased}>Purchased</Text>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={[styles.buyBtn, inCart && styles.buyBtnInCart]}
+                onPress={() => { if (!inCart) addToCart(idCourse); }}
+                disabled={inCart || addingToCart}
+                activeOpacity={0.8}>
+                <Text style={[styles.buyBtnText, inCart && styles.buyBtnTextInCart]}>
+                  {inCart ? 'In cart' : addingToCart ? 'Adding…' : 'Add to cart'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </>
         )}
       </View>
 
@@ -618,6 +643,20 @@ const styles = StyleSheet.create({
   },
   wishlistBtnDisabled: {
     opacity: 0.4,
+  },
+  guestLoginBtn: {
+    height: 46,
+    paddingHorizontal: 18,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  guestLoginBtnText: {
+    color: colors.textPrimary,
+    fontSize: 14,
+    fontWeight: '700',
   },
   buyBtn: {
     flex: 2,

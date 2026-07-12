@@ -12,11 +12,15 @@ import AppHeader from '../components/AppHeader';
 import QueryState from '../components/QueryState';
 import EmptyState from '../components/EmptyState';
 import { usePurchasedCourses } from '../hooks/useCourses';
+import { useCurrentUser } from '../hooks/useCurrentUser';
+import { useAuthNavigation } from '../hooks/useAuthNavigation';
 import { Course } from '../types/course';
 import { MyVaultScreenProps } from '../types/navigation';
 import { colors } from '../config/theme';
 
 export default function MyVaultScreen({ navigation }: MyVaultScreenProps) {
+  const { isAuthenticated } = useCurrentUser();
+  const { onCartPress, onNotificationsPress } = useAuthNavigation(navigation);
   const { data: courses = [], isLoading, isError, refetch } = usePurchasedCourses();
 
   const renderItem = ({ item }: { item: Course }) => (
@@ -55,13 +59,22 @@ export default function MyVaultScreen({ navigation }: MyVaultScreenProps) {
     <View style={styles.container}>
       <AppHeader
         title="My Vault"
-        onNotificationsPress={() => navigation.navigate('Notifications')}
-        onCartPress={() => navigation.navigate('Cart')}
+        onNotificationsPress={onNotificationsPress}
+        onCartPress={onCartPress}
       />
 
-      <QueryState isLoading={isLoading} isError={isError} onRetry={refetch} />
+      {!isAuthenticated && (
+        <EmptyState
+          icon="lock"
+          title="Log in to see your vault"
+          subtitle="Purchased courses are available after signing in."
+          action={{ label: 'Log in', onPress: () => navigation.navigate('Login') }}
+        />
+      )}
 
-      {!isLoading && !isError && courses.length === 0 && (
+      {isAuthenticated && <QueryState isLoading={isLoading} isError={isError} onRetry={refetch} />}
+
+      {isAuthenticated && !isLoading && !isError && courses.length === 0 && (
         <EmptyState
           icon="playcircleo"
           title="No courses yet"
@@ -69,7 +82,7 @@ export default function MyVaultScreen({ navigation }: MyVaultScreenProps) {
         />
       )}
 
-      {!isLoading && !isError && courses.length > 0 && (
+      {isAuthenticated && !isLoading && !isError && courses.length > 0 && (
         <FlatList
           data={courses}
           keyExtractor={item => item.idCourse.toString()}

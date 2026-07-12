@@ -13,6 +13,7 @@ import AppHeader from '../components/AppHeader';
 import EmptyState from '../components/EmptyState';
 import CourseCard from '../components/CourseCard';
 import { useCourseSearch, useCategories } from '../hooks/useCourses';
+import { useAuthNavigation } from '../hooks/useAuthNavigation';
 import { Course } from '../types/course';
 import { SearchScreenProps } from '../types/navigation';
 import { colors } from '../config/theme';
@@ -24,6 +25,7 @@ const SORT_OPTIONS = [
 ];
 
 export default function SearchScreen({ navigation, route }: SearchScreenProps) {
+  const { onCartPress, onNotificationsPress } = useAuthNavigation(navigation);
   const params = route.params;
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,8 +84,8 @@ export default function SearchScreen({ navigation, route }: SearchScreenProps) {
           {/* HEADER */}
           <AppHeader
             title="Search"
-            onNotificationsPress={() => navigation.navigate('Notifications')}
-            onCartPress={() => navigation.navigate('Cart')}
+            onNotificationsPress={onNotificationsPress}
+            onCartPress={onCartPress}
           />
 
           {/* SEARCH INPUT */}

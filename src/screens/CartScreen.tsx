@@ -15,14 +15,29 @@ import QueryState from '../components/QueryState';
 import EmptyState from '../components/EmptyState';
 import { useCart, useRemoveFromCart } from '../hooks/useCart';
 import { useCheckout } from '../hooks/useOrders';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 import { Course } from '../types/course';
 import { CartScreenProps } from '../types/navigation';
 import { colors } from '../config/theme';
 
 export default function CartScreen({ navigation }: CartScreenProps) {
+  const { isAuthenticated } = useCurrentUser();
   const { data: courses = [], isLoading, isError, refetch } = useCart();
   const removeFromCart = useRemoveFromCart();
   const checkout = useCheckout();
+
+  if (!isAuthenticated) {
+    return (
+      <View style={styles.container}>
+        <EmptyState
+          icon="shoppingcart"
+          title="Log in to view your cart"
+          subtitle="Add courses to cart after signing in."
+          action={{ label: 'Log in', onPress: () => navigation.navigate('Login') }}
+        />
+      </View>
+    );
+  }
 
   const total = courses.reduce((sum, c) => sum + c.price, 0);
 

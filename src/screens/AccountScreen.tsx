@@ -11,7 +11,9 @@ import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '../hooks/useCurrentUser';
+import { useAuthNavigation } from '../hooks/useAuthNavigation';
 import AppHeader from '../components/AppHeader';
+import EmptyState from '../components/EmptyState';
 import { AccountScreenProps } from '../types/navigation';
 import { colors } from '../config/theme';
 
@@ -40,7 +42,8 @@ function MenuRow({ icon, label, onPress, danger = false }: MenuRowProps) {
 
 
 export default function AccountScreen({ navigation }: AccountScreenProps) {
-  const { firstName, lastName } = useCurrentUser();
+  const { firstName, lastName, isAuthenticated } = useCurrentUser();
+  const { onCartPress, onNotificationsPress } = useAuthNavigation(navigation);
   const queryClient = useQueryClient();
 
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || '—';
@@ -57,20 +60,48 @@ export default function AccountScreen({ navigation }: AccountScreenProps) {
           onPress: async () => {
             await AsyncStorage.removeItem('token');
             queryClient.clear();
-            navigation.getParent()?.reset({ index: 0, routes: [{ name: 'Login' }] });
+            navigation.getParent()?.reset({ index: 0, routes: [{ name: 'Home' }] });
           },
         },
       ],
     );
   };
 
+  if (!isAuthenticated) {
+    return (
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <AppHeader
+          title="Account"
+          subtitle="Browse as guest"
+          onNotificationsPress={onNotificationsPress}
+          onCartPress={onCartPress}
+          paddingBottom={24}
+          alignItems="flex-start"
+        />
+        <EmptyState
+          icon="user"
+          title="Log in to your account"
+          subtitle="Sign in to access your vault, wishlist, orders and seller tools."
+          action={{ label: 'Log in', onPress: () => navigation.navigate('Login') }}
+        />
+        <TouchableOpacity
+          style={styles.guestSignUpBtn}
+          onPress={() => navigation.navigate('Register')}
+          activeOpacity={0.8}>
+          <Text style={styles.guestSignUpText}>Create free account</Text>
+        </TouchableOpacity>
+        <View style={{ height: 40 }} />
+      </ScrollView>
+    );
+  }
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <AppHeader
         title="Account"
         subtitle={fullName}
-        onNotificationsPress={() => navigation.navigate('Notifications')}
-        onCartPress={() => navigation.navigate('Cart')}
+        onNotificationsPress={onNotificationsPress}
+        onCartPress={onCartPress}
         paddingBottom={24}
         alignItems="flex-start"
       />
@@ -167,5 +198,19 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.border,
     marginLeft: 66,
+  },
+  guestSignUpBtn: {
+    alignSelf: 'center',
+    marginTop: -20,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  guestSignUpText: {
+    color: colors.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

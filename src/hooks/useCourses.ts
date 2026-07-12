@@ -7,6 +7,7 @@ import {
   fetchCourseSearch,
   fetchPurchasedCourses,
 } from '../api/coursesApi';
+import { useCurrentUser } from './useCurrentUser';
 
 export const usePopularCourses = () =>
   useQuery({
@@ -32,11 +33,15 @@ export const useCategories = () =>
     queryFn: fetchCategories,
   });
 
-export const usePurchasedCourses = () =>
-  useQuery({
+export const usePurchasedCourses = () => {
+  const { isAuthenticated } = useCurrentUser();
+
+  return useQuery({
     queryKey: ['courses', 'purchased'],
     queryFn: fetchPurchasedCourses,
+    enabled: isAuthenticated,
   });
+};
 
 export const useCourseSearch = (params: {
   search?: string;

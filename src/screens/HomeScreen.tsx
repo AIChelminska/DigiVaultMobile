@@ -11,12 +11,14 @@ import CourseSection from '../components/CourseSection';
 import AppHeader from '../components/AppHeader';
 import { usePopularCourses, useNewestCourses, useTopRatedCourses, useCategories } from '../hooks/useCourses';
 import { useCurrentUser } from '../hooks/useCurrentUser';
+import { useAuthNavigation } from '../hooks/useAuthNavigation';
 import { Course } from '../types/course';
 import { HomeScreenProps } from '../types/navigation';
 import { colors } from '../config/theme';
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { firstName } = useCurrentUser();
+  const { onCartPress, onNotificationsPress } = useAuthNavigation(navigation);
 
   const { data: popularCourses = [], isLoading: loadingPopular, isError: errorPopular, refetch: refetchPopular } = usePopularCourses();
   const { data: newestCourses = [], isLoading: loadingNewest, isError: errorNewest, refetch: refetchNewest } = useNewestCourses();
@@ -33,8 +35,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       <AppHeader
         label="Hello,"
         title={firstName ?? 'My Dear Guest 👋'}
-        onNotificationsPress={() => navigation.navigate('Notifications')}
-        onCartPress={() => navigation.navigate('Cart')}
+        onNotificationsPress={onNotificationsPress}
+        onCartPress={onCartPress}
         paddingBottom={28}
       />
 
